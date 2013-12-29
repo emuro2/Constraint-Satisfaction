@@ -3,6 +3,10 @@ Constraint-Satisfaction
 
 Constraint Satisfaction Problems 
 
+Assignment link: http://www.cs.illinois.edu/~slazebni/fall13/assignment2.html
+
+Description:
+
 Scheduling is a common CSP. You are to find a feasible meeting schedule that satisfies the constraints of each of the employees in a company. The description of our scheduling problem is as follows:
 
 There is a set of M employees.
