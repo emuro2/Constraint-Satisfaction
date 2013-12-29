@@ -20,7 +20,7 @@ Format of the problem files
 
 Each problem file describes an instance of the scheduling problem, specifying the total number of meetings to schedule, the number of employees, which meetings each employee must attend, the times required to travel between meetings, and the total number of available time slots in the schedule. Notice that two meetings may be assigned to the same time slot as long there is no employee that must be in both of them. Consider the following sample problem:
 Number of meetings: 5
-Number of employees: 6
+Number of employees: 6 
 Number of time slots: 5
 
 Meetings each employee must attend:
