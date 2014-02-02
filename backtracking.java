@@ -1,10 +1,10 @@
 
 /*
  * @author Erik Muro
+ * emuro2
  * 
  * 
- * 
- * Constraint Satisfaction Problem: Initializes the CSP and calls the backtracking function to complete assignment
+ * CSP
  * 
  * TimeSlots = Number of TimeSlots with the specified problem
  * numMeetings = Number of Meetings with the specified problem
@@ -13,8 +13,6 @@
  * travelTime = Double Array of integers, the travel distances from a meeting to another
  * MostConstrained = Queue that self maintains my Most Constrained Variables
  * 
- *
- *
  */
 
 
@@ -61,17 +59,9 @@ public class CSP {
 	
 	
 	
-	
-	
-	
-	
-	// CSP problem 1
-	public static void CSProblem1() 
+	//CSP sample problem to check on a small test case first
+	public static void CSPSample()
 	{
-		
-		System.out.println("Problem 1");
-		
-		
 		
 		/*
 		  
@@ -91,12 +81,12 @@ public class CSP {
 		*/
 		
 
-		int numMeetings = 20;
+		int numMeetings = 5;
 		
-		int TimeSlots = 12;
+		int TimeSlots = 5;
+
 		
-		
-		//initialize
+		//initializing Meetings array
 		meeting [] Meetings = new meeting[numMeetings];
 		
 		for(int i = 0; i < Meetings.length; i++)
@@ -105,19 +95,23 @@ public class CSP {
 			Meetings[i].MeetingNum = i+1;
 		}
 		
-		int [][] travel = new int[20][20];
-	
+		int [][] travel = new int[5][5];
+		
+		
+		
+		
+		//initializing Employee array
 		employee [] emp; 		
-		emp = new employee[33];
+		emp = new employee[6];
 		
 		for(int i = 0; i < emp.length; i++)
 		{
 					//System.out.println(i);
 			emp[i]= new employee();
-			if(i ==9 || i==12 || i==14)
-				emp[i].meetings = new meeting[6];
+			if(i == 3)
+				emp[i].meetings = new meeting[3];
 			else
-				emp[i].meetings = new meeting[5];
+				emp[i].meetings = new meeting[2];
 			
 			for(int j = 0; j< emp[i].meetings.length; j++ )
 			{
@@ -125,13 +119,15 @@ public class CSP {
 			}
 		}
 		
-	
+		
+		
+		
 		
 		//input numbers from txt file
 		try {
 
-			//input the CSP problem 1
-			File file = new File("problem1.txt");
+			//grab txt file for CSP problem
+			File file = new File("SampleProblem.txt");
 			Scanner s = new Scanner(file);
 			
 			
@@ -145,15 +141,15 @@ public class CSP {
 				}
 			}
 
+			//set up travel distances
 			for(int i = 0; i < travel.length; i++)
 			{
 				for(int j = 0; j < travel.length; j++)
 				{
 					if(s.hasNextInt())
-						travel[i][j]= s.nextInt();
+						travel[i][j]= s.nextInt();		
 				}
-			}
-
+			}			
 		} 
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -161,25 +157,67 @@ public class CSP {
 
 
 		
-		
+		//initialize the CSP
 		CSP CSPSample = new CSP( TimeSlots, numMeetings, Meetings, emp, travel);
-		CSPSample.MostConstrained = new Queue();
-		CSPSample.GlobalIndex = 0;
-		CSPSample.GlobalVarAssign = 0;
+		
+		
+		
+		System.out.println("Number of meetings: " + CSPSample.numMeetings);
+		System.out.println("Number of employees: " + CSPSample.emp.length);
+		System.out.println("Number of time slots: " + CSPSample.TimeSlots);
+		System.out.println();
 		
 	
+		System.out.println("Meetings each employee must attend: ");
+
+		
+		//print out the meetings each employee has to attend
+		for(int i = 0; i < CSPSample.emp.length; i++)
+		{
+			System.out.print(i+1 + ": ");
+			for(int j = 0; j < CSPSample.emp[i].meetings.length; j ++)
+			{
+				System.out.print(CSPSample.emp[i].meetings[j].MeetingNum + " " );//+ "Meeting TimeSlot: "+ emp[i].meetings[j].Timeslot + " / " );
+				
+			}
+
+			System.out.println();
+		}
+		
+		System.out.println();
+		
+
+
+		
+		System.out.println("Travel Time between meetings:");
+		
+		for(int i = 0; i < CSPSample.travelTime.length; i++)
+		{
+			System.out.print(i+1 + ": ");
+			for(int j = 0; j < CSPSample.travelTime.length; j++)
+			{
+				System.out.print(CSPSample.travelTime[i][j] + " " );
+				
+			}
+			System.out.println();
+			
+		}
+		
+		System.out.println();
+		
+		
 		
 		//BackTracking!!!
 		
-		//pass in -1 to initially start the backtracking function
-		boolean result = CSP.BackTracking( -1 , CSPSample);
+		
+		boolean result = CSP.BackTracking( -1 ,  CSPSample);
 		
 		if(result == false)
 		{
 			System.out.println();
 			System.out.println("Could not Satisfy the Constraints!");
 		}
-	
+		
 		else
 		{
 			//print out the time slots and meetings at the time slots
@@ -187,126 +225,77 @@ public class CSP {
 			{
 				System.out.println("Meeting "+(i+1)+" is scheduled at time " +  CSPSample.Meetings[i].Timeslot);
 			}
-			
-			System.out.println("Number of Variables assigned: " + CSPSample.GlobalVarAssign);
-			
 			System.out.println("Satisfied");
 		}
-	}//end of problem 1
+		
+	}
+
 	
-	
-
-
-
-
 
 	//BackTracking function (Brute Force)
-	/*
-	* Iterates through each assignment and checks if no constraints are violated
-	*
-	* @param int meetingNumber is the meetingNumber assigned before the call to recurse
-	* @param CSP csp is the constraint satisfaction problem with all variables and assignments
-	*/
 	static boolean BackTracking( int meetingNumber ,  CSP csp) 
 	{
-		//complete?
+		
+		//if assignment is complete then return assignment
+		/*meeting number and timeslot it is assigned too */
 		if( assignComplete( meetingNumber,  csp) )
 		{
 			return true;
 		}
 		
-	
-		int j = getMeeting(csp);
 		
-	
+		
+		//get a meeting to assign next
+		int j = meeting.getMeeting(csp);
+		
+		
+			//select a time slot for the meeting
 			for(int i = 0; i < csp.TimeSlots; i++)
 			{
 				
-					csp.Meetings[j].Timeslot = i+1;
-					csp.Meetings[j].assigned = true;
+			
+				//for each value in the Domain, check if the assignment is consistent with the Constraints
+				//if so, add to the variable and recurse with that new assignment
 				
-					int meetNum = j+1;
-					
-					if( checkEmployeeAssignment(meetNum, csp) || j ==0)
+				csp.Meetings[j].Timeslot = i+1;
+				csp.Meetings[j].assigned = true;
+			
+				int meetNum = j+1;
+				
+				//check consistency with employees
+				if( employee.checkEmployeeAssignment(meetNum, csp) || j ==0)
+				{
+			
+					//just count an attempted variable assignment when we actually find a consistent value.
+					csp.GlobalVarAssign = csp.GlobalVarAssign+1;
+										
+					boolean recurse = BackTracking( meetNum,  csp); 
+	
+					//once returned from recurse...if the result is failure... then remove assignment and continue searching
+					if(recurse == true)
 					{
-			
-						csp.GlobalVarAssign++;
 						
-						boolean recurse = BackTracking( meetNum,  csp); 
-
-						if(recurse == true)
-						{
-							return true;
-						}
-						
+						return true;
 					}
-					//else assignment is bad 
-					unassign(j, csp);
-			
+
+				}
+				//else assignment is bad and switch the time slot for meeting, go on to the next one
+				//un-assign that assignment
+				unassign(j, csp);
+		
 			}
 
+		//return failure
 		return false;
 
 	}//end of Backtracking
 
-
-
-
-
-
-
-//un-assign all the meetings associated with j and after j in the meeting array
-private static void unassign(int j, CSP csp) {
-	
-		for(int i = j; i < csp.Meetings.length; i++ )
-		{
-			csp.Meetings[i].Timeslot = 0;
-			csp.Meetings[i].assigned = false;
-			
-			for(int in = 0; in < csp.emp.length; in++)
-			{
-				
-				for(int jl = 0; jl < csp.emp[in].meetings.length; jl ++)
-				{
-
-					//check if employee has meeting, if so then make sure the assignment is consistent
-					if(csp.emp[in].meetings[jl].MeetingNum == i+1)
-					{
-						csp.emp[in].meetings[jl].assigned = false;
-						csp.emp[in].meetings[jl].Timeslot = 0;
-					}
-				}
-			}
-		}
-		
-	}
-
-
-
-
-
-
-
-  //return a meeting at has not been assigned yet
-  private static int getMeeting(CSP csp) 
-  {
-  	for(int i = 0; i < csp.Meetings.length; i++)
-  	{
-  		if(!csp.Meetings[i].assigned)
-  		{
-  			return i;
-  		}
-  	}
-
-    return 0;
-  }
-	
 	
 	
 
 
 
-	//Checks the Meetings variable in the CSP to see if the assignment is complete
+//Checks the Meetings variable in the CSP to see if the assignment is complete
 	/*
 	 * @param meetingNumber is the number of the meeting which was assigned (not 0 based index)
 	 * 
@@ -315,25 +304,35 @@ private static void unassign(int j, CSP csp) {
 	 */
 	private static boolean assignComplete( int meetNumber, CSP csp) 
 	{
+	
+		//-1 is to initialize Backtracking function
 		if(meetNumber == -1)
-		{
+		{	
 			return false;
 		}
 		
+		
+		
 		//check if the assignment doesn't violate any constraints
-		boolean employ = checkEmployeeAssignment(meetNumber , csp);
+		//check each employee to see that they can go to each meeting
+		boolean employ = employee.checkEmployeeAssignment(meetNumber , csp);
+		
 		
 		if(employ == false)
 		{
 			return false;
 		}
 		
+		
+		//check that each meeting has an assignment 
 		for(int i = 0; i < csp.Meetings.length; i++)
 		{
+			
 			if(!csp.Meetings[i].assigned)	
 			{
 				return false;
 			}
+
 		}
 		
 		return true;
@@ -351,116 +350,34 @@ private static void unassign(int j, CSP csp) {
 	
 	
 
-	//Checks if assignment is consistent with employees
-	private static boolean checkEmployeeAssignment( int meetingNumber, CSP csp) 
-	{
-		for(int i = 0; i < csp.emp.length; i++)
-		{
-			
-			for(int j = 0; j < csp.emp[i].meetings.length; j ++)
-			{
-				//check if employee has meeting, if so then make sure the assignment is consistent
-				if(csp.emp[i].meetings[j].MeetingNum == meetingNumber)
-				{
-					csp.emp[i].meetings[j].assigned = true;
-					csp.emp[i].meetings[j].Timeslot =  csp.Meetings[meetingNumber-1].Timeslot;
-
-					
-					
-					//employee at i-th index has meeting, and we need to check that the assignment is consistent
-					boolean re = empConsistency(csp.emp[i], csp);
-					
-					if(re == false)
-					{
-						//reset the meeting to not assigned because it is not a valid assignment
-						csp.emp[i].meetings[j].assigned = false;
-						csp.emp[i].meetings[j].Timeslot =  0;
-						return false;
-					}
-					//else assignment is consistent with THIS employee, check the rest of the employees
-					
-				}
-			}
-		}
-		
-
-		//have gone through all the employees and employee's meetings
-		//no conflicts so return true
-		
-		return true;
-	
-	}//end of checking consistency with employees
-
-
-	
-	
-	
-	
-	
-	
-	/*
-	* called from checkEmployeeAssignment, checks the travel distances from meetings
-	*/
-	private static boolean empConsistency(employee employee, CSP csp) 
+	//un-assign all the meetings associated with j and after j in the meeting array
+	private static void unassign(int j, CSP csp) 
 	{
 		
-		for(int i = 0; i < employee.meetings.length; i++)
+		for(int i = j; i < csp.Meetings.length; i++ )
 		{
+			csp.Meetings[i].Timeslot = 0;
+			csp.Meetings[i].assigned = false;
 			
-			//check if meeting was assigned (if not then the assignment can be true)
-			if(employee.meetings[i].assigned)
+			for(int in = 0; in < csp.emp.length; in++)
 			{
-				int timeslot = employee.meetings[i].Timeslot;
-				int specMeeting = employee.meetings[i].MeetingNum-1;
 				
-				for(int j = 0; j < employee.meetings.length; j++)
+				for(int jl = 0; jl < csp.emp[in].meetings.length; jl ++)
 				{
-			
-					if(employee.meetings[j].assigned && (employee.meetings[j].MeetingNum != specMeeting+1))
+
+					//check if employee has meeting, if so then make sure the assignment is consistent
+					if(csp.emp[in].meetings[jl].MeetingNum == i+1)
 					{
-						int toMeeting = employee.meetings[j].MeetingNum-1;
-						
-						int TimeforThisMeeting = employee.meetings[j].Timeslot;
-						
-						if(timeslot == TimeforThisMeeting)
-						{
-						
-							//employee cannot be at different meetings at the same time
-							return false;
-						}
-							
-						else if(timeslot > TimeforThisMeeting)
-						{
-							//meeting at j is before meeting at i
-							int travelDist = csp.travelTime[toMeeting][specMeeting];
-							
-							if(travelDist >= Math.abs(timeslot - TimeforThisMeeting) )
-							{
-								return false;
-							}
-							
-						}
-						
-						else if(timeslot < TimeforThisMeeting)
-						{
-							//meeting at i is before meeting at j
-							int travelDist = csp.travelTime[specMeeting][toMeeting];
-							
-							if(travelDist >= Math.abs(timeslot - TimeforThisMeeting) )
-							{
-								return false;
-							}
-							
-						}
+						csp.emp[in].meetings[jl].assigned = false;
+						csp.emp[in].meetings[jl].Timeslot = 0;
 					}
+			
 				}
+
 			}
 		}
-		
-		//no conflicts!!! return true
-		
-		return true;
-	}//end of employee consistency check
+
+	}
 	
 	
 	
